@@ -19,16 +19,19 @@
 ## 2. 실험 과정 및 결과 분석 방법
 
 1. **시간 범위 설정**: 총 진화 시간 $t$를 $0.0$부터 $2.0$까지 $0.1$ 간격으로 나눈 21개의 포인트에 대해 실험을 수행합니다.
+
 2. **회로 생성 및 실행**:
    
    - 각 시간 포인트 $t$에 맞춰 Lie-Trotter(1차), Suzuki-2nd(2차), Suzuki-4th(4차) 공식을 적용하여 양자 회로를 동적으로 생성합니다.
    
    - 이 회로를 양자 백엔드(noiseless 시뮬레이터, FakeBrisbane 노이즈 모델 시뮬레이터, 실제 IBM Yonsei 하드웨어)에 트랜스파일하여 실행시킵니다.
+
 3. **데이터 수집 및 메트릭 산출**:
    
    - 백엔드에서 관측값 $\langle Z_0(t) \rangle$ 결과를 수집합니다.
    
    - 참값(Exact)과의 유사성을 평가하기 위해 **RMS Error(루트 평균 제곱 오차)**, **Max Absolute Error(최대 절대 오차)** 및 **Correlation(상관 계수/충실도)** 세 가지 정량 메트릭을 도출합니다.
+
 4. **FFT 스펙트럼 분석**:
    
    - 구한 진화 궤적 신호에 Hann Window를 적용하여 주파수 누설을 막고, 주파수 도메인 상의 분해능을 극대화하기 위해 4배의 Zero-Padding을 덧붙여 고해상도 FFT를 수행합니다.
@@ -45,8 +48,7 @@
 |:--------------------------------------------- |:------------------------------------------------------------------------------------------------ |:-------------------------------------------------------------------------------------------------------------------------------------- |
 | **핵심 설계**                                     | 시간 간격 $dt = 0.2$ 고정                                                                              | 허용 상태 오차(Infidelity) $\epsilon \le 0.05$ 고정                                                                                            |
 | **시간당 step 수 $r$**                            | 시간 $t$에 비례하여 균일 증가 ($t=2.0$ 일 때 모두 $r=10$으로 동일)                                                  | 차수별 수학적 오차 한계에 따라 동적 계산 ($t=2.0$ 일 때 Lie: 21, Suzuki-2nd: 5, Suzuki-4th: 2)                                                            |
-| **최대 2-qubit 게이트 수**<br>(at $t=2.0$ ECR gate) | - Lie-Trotter: **120개**<br>- Suzuki-2nd: **240개**<br>- Suzuki-4th: **1200개**                    | - Lie-Trotter: **252개**<br>- Suzuki-2nd: **120개**<br>- Suzuki-4th: **240개**                                                            |
-| **최대 회로 깊이 (Depth)**<br>(at $t=2.0$)        | - Lie-Trotter: **74**<br>- Suzuki-2nd: **191**<br>- Suzuki-4th: **951**                            | - Lie-Trotter: **151**<br>- Suzuki-2nd: **96**<br>- Suzuki-4th: **191**                                                                    |
+| **최대 2-qubit 게이트 수**<br>(at $t=2.0$ ECR gate) | - Lie-Trotter: **120개**<br>- Suzuki-2nd: **240개**<br>- Suzuki-4th: **1200개!**                    | - Lie-Trotter: **252개**<br>- Suzuki-2nd: **120개**<br>- Suzuki-4th: **240개**                                                            |
 | **총 측정 횟수 (Shots)**                           | target standard error = 0.01 (회로당 약 10,000 shots)                                                | target standard error = 0.01 (회로당 약 10,000 shots)                                                                                      |
 | **Error Mitigation**                          | - **DD (XY4)**: 모든 노이즈/QPU 런에 적용<br>- **TREX**: QPU 런에 기본 적용<br>- ZNE 미적용 (`resilience_level=1`) | - **DD (XY4)**: 모든 노이즈/QPU 런에 적용<br>- **TREX**: QPU 런에 기본 적용<br>- **Dynamic ZNE**: 최대 2Q 게이트 수에 맞춰 자동 조절 (`resilience_level=1` or `2`) |
 | **QPU 실행 모델**                                 | Lie-Trotter, Suzuki-2nd만 수행 (4th 제외)                                                             | Lie-Trotter, Suzuki-2nd만 수행 (4th 제외)                                                                                                   |
